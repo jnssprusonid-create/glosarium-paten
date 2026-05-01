@@ -132,13 +132,16 @@ if check_password():
     else:
         st.info("💡 **Translator Tip:** This adaptive filter prevents searching the same column twice.")
 
-    # 6. SIDEBAR
+    # 6. SIDEBAR (Tanpa Gambar)
     with st.sidebar:
-                if st.button("🔄 Sync Database"):
+        st.title("Admin Tools")
+        if st.button("🔄 Sync Database"):
             st.cache_data.clear()
+            st.success("Database Updated!")
             st.rerun()
         st.write("---")
         st.caption("Spruson & Ferguson Indonesia")
+        st.caption("Patent Glossary Portal v1.5")
 
 # --- FORM KOMUNIKASI ---
     st.write("---")
