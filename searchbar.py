@@ -3,7 +3,7 @@ from streamlit_gsheets import GSheetsConnection
 import pandas as pd
 
 # 1. Konfigurasi Halaman
-st.set_page_config(page_title="Portal Glosarium Paten", layout="wide")
+st.set_page_config(page_title="Portal Glosarium Paten", layout="centered") # 'centered' lebih enak dilihat untuk layout atas-bawah
 
 # 2. Sistem Login
 def check_password():
@@ -31,16 +31,16 @@ def check_password():
 
 if check_password():
     st.title("🔍 Portal Glosarium Padanan Paten")
-    st.write("Gunakan filter di bawah untuk mencari padanan istilah teknis.")
+    st.write("Cari padanan istilah teknis untuk menjaga konsistensi dokumen.")
 
     # 3. Koneksi Data
     conn = st.connection("gsheets", type=GSheetsConnection)
+    # Pastikan URL sheet ada di Secrets
     df = conn.read(spreadsheet=st.secrets["connections"]["gsheets"]["spreadsheet"])
     
-    # Memastikan nama kolom bersih (tanpa spasi di awal/akhir)
+    # Membersihkan nama kolom
     df.columns = [c.strip() for c in df.columns]
 
-    # Opsi filter berdasarkan kolom yang ada
     options = {
         "Istilah Asing": "istilah_asing",
         "Padanan": "padanan",
@@ -49,34 +49,33 @@ if check_password():
         "Sumber": "sumber"
     }
 
-    # 4. Filter Berjenjang (Searchbar 1 & 2)
-    col1, col2 = st.columns(2)
+    # 4. UI Filter Atas-Bawah
+    st.markdown("---")
     
-    with col1:
-        st.subheader("Filter Utama")
-        cat1 = st.selectbox("Cari berdasarkan:", list(options.keys()), key="cat1")
-        val1 = st.text_input(f"Masukkan kata kunci {cat1}...", key="val1")
+    # Bagian Filter Utama
+    st.subheader("1. Filter Utama")
+    cat1 = st.selectbox("Cari berdasarkan:", list(options.keys()), key="cat1")
+    val1 = st.text_input(f"Masukkan kata kunci {cat1}...", placeholder="Contoh: Device atau Transmitting", key="val1")
 
-    with col2:
-        st.subheader("Filter Tambahan (Opsional)")
-        cat2 = st.selectbox("Filter lebih lanjut dengan:", list(options.keys()), index=1, key="cat2")
-        val2 = st.text_input(f"Masukkan kata kunci {cat2} tambahan...", key="val2")
+    # Bagian Filter Tambahan
+    st.subheader("2. Filter Tambahan (Opsional)")
+    cat2 = st.selectbox("Filter lebih lanjut dengan:", list(options.keys()), index=1, key="cat2")
+    val2 = st.text_input(f"Masukkan kata kunci {cat2} tambahan...", placeholder="Opsional", key="val2")
 
-    # 5. Logika Pencarian
+    # 5. Logika Pencarian & Tampilan Tabel
     results = df.copy()
 
-    # Trigger: Tabel hanya muncul jika filter utama diisi
+    # Trigger: Tabel hanya muncul jika Filter Utama (val1) diisi
     if val1:
-        # Terapkan filter pertama
+        # Filter pertama
         results = results[results[options[cat1]].astype(str).str.contains(val1, case=False, na=False)]
         
-        # Terapkan filter kedua jika diisi
+        # Filter kedua (hanya jika diisi)
         if val2:
             results = results[results[options[cat2]].astype(str).str.contains(val2, case=False, na=False)]
 
-        # 6. Tampilan Tabel (Hanya Muncul Jika Ada Trigger Pencarian)
-        st.divider()
-        st.subheader(f"Hasil Pencarian: {len(results)} ditemukan")
+        st.markdown("---")
+        st.subheader(f"✅ Hasil Pencarian ({len(results)} data)")
         
         if not results.empty:
             st.dataframe(
@@ -85,11 +84,11 @@ if check_password():
                 hide_index=True
             )
         else:
-            st.warning("Tidak ada data yang cocok dengan kriteria pencarian Anda.")
+            st.warning("Data tidak ditemukan. Pastikan kata kunci sudah benar.")
     else:
-        st.info("Silakan masukkan kata kunci pada Filter Utama untuk menampilkan data.")
+        st.info("Silakan masukkan kata kunci pada **Filter Utama** di atas untuk menampilkan hasil.")
 
-    # Tombol Refresh
+    # Tombol Refresh di Sidebar agar tidak mengganggu layout utama
     if st.sidebar.button("🔄 Refresh Database"):
         st.cache_data.clear()
         st.rerun()
