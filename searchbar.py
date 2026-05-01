@@ -57,7 +57,7 @@ def check_password():
 if check_password():
     # --- HEADER ---
     st.markdown("<h1 class='main-title'>PATENT GLOSSARY PORTAL</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='sub-title'>Spruson & Ferguson Indonesia • Adaptive Terminology Search</p>", unsafe_allow_html=True)
+    st.markdown("<p class='sub-title'>Spruson & Ferguson Indonesia • Terminology Search</p>", unsafe_allow_html=True)
     
     # 3. Koneksi Data
     conn = st.connection("gsheets", type=GSheetsConnection)
