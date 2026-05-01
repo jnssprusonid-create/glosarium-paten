@@ -41,10 +41,10 @@ if check_password():
 
     options = {
         "Istilah Asing": "istilah_asing",
-        "Padanan": "Padanan",
-        "Nama Pemohon": "Nama Pemohon",
-        "Nomor Permohonan": "Nomor Permohonan",
-        "Sumber": "Sumber"
+        "Padanan": "padanan",
+        "Nama Pemohon": "nama_pemohon",
+        "Nomor Permohonan": "nomor_permohonan",
+        "Sumber": "sumber"
     }
 
     st.write("---")
