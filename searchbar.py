@@ -43,10 +43,10 @@ if check_password():
     # Opsi filter berdasarkan kolom yang ada
     options = {
         "Istilah Asing": "istilah_asing",
-        "Padanan": "Padanan",
-        "Nama Pemohon": "Nama Pemohon",
-        "Nomor Permohonan": "Nomor Permohonan",
-        "Sumber": "Sumber"
+        "Padanan": "padanan",
+        "Nama Pemohon": "nama_pemohon",
+        "Nomor Permohonan": "nomor_permohonan",
+        "Sumber": "sumber"
     }
 
     # 4. Filter Berjenjang (Searchbar 1 & 2)
