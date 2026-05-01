@@ -36,50 +36,46 @@ if check_password():
     conn = st.connection("gsheets", type=GSheetsConnection)
     df = conn.read(spreadsheet=st.secrets["connections"]["gsheets"]["spreadsheet"])
     
-    # Membersihkan nama kolom dari spasi liar
+    # Membersihkan nama kolom
     df.columns = [c.strip() for c in df.columns]
 
-    # Mapping label ke nama kolom asli di Google Sheets
     options = {
         "Istilah Asing": "istilah_asing",
-        "Padanan": "padanan",
-        "Nama Pemohon": "nama_pemohon",
-        "Nomor Permohonan": "nomor_permohonan",
-        "Sumber": "sumber"
+        "Padanan": "Padanan",
+        "Nama Pemohon": "Nama Pemohon",
+        "Nomor Permohonan": "Nomor Permohonan",
+        "Sumber": "Sumber"
     }
 
-    # 4. UI Filter
     st.write("---")
-    st.subheader("1. Filter Utama")
-    
-    # Baris pertama: Sejajar (Horizontal)
-    col1_a, col1_b = st.columns([1, 2]) # Rasio 1:2 agar kolom input lebih lebar
-    
+
+    # 4. Filter Baris 1 (Utama)
+    col1_a, col1_b = st.columns([1, 2])
     with col1_a:
         cat1 = st.selectbox("Cari berdasarkan:", list(options.keys()), key="cat1")
-    
     with col1_b:
-        val1 = st.text_input(f"Masukkan kata kunci {cat1}...", placeholder=f"Ketik {cat1} di sini...", key="val1")
+        val1 = st.text_input(f"Masukkan kata kunci {cat1}...", placeholder=f"Contoh: Device atau Transmitting", key="val1")
 
-    # Baris kedua: Di bawahnya (Vertical)
-    st.subheader("2. Filter Tambahan (Opsional)")
-    cat2 = st.selectbox("Filter lebih lanjut dengan:", list(options.keys()), index=1, key="cat2")
-    val2 = st.text_input(f"Masukkan kata kunci {cat2} tambahan...", placeholder="Kosongkan jika tidak diperlukan", key="val2")
+    # 5. Filter Baris 2 (Tambahan)
+    col2_a, col2_b = st.columns([1, 2])
+    with col2_a:
+        cat2 = st.selectbox("Filter tambahan dengan:", list(options.keys()), index=1, key="cat2")
+    with col2_b:
+        val2 = st.text_input(f"Masukkan kata kunci {cat2} tambahan...", placeholder="Kosongkan jika tidak diperlukan", key="val2")
 
-    # 5. Logika Pencarian & Trigger Tabel
+    # 6. Logika Pencarian & Trigger
     results = df.copy()
 
-    # Tabel HANYA muncul jika Filter Utama diisi
     if val1:
-        # Terapkan filter pertama
+        # Filter pertama
         results = results[results[options[cat1]].astype(str).str.contains(val1, case=False, na=False)]
         
-        # Terapkan filter kedua jika ada isinya
+        # Filter kedua (jika ada isinya)
         if val2:
             results = results[results[options[cat2]].astype(str).str.contains(val2, case=False, na=False)]
 
         st.write("---")
-        st.subheader(f"📊 Hasil Pencarian ({len(results)} ditemukan)")
+        st.subheader(f"📊 Hasil: {len(results)} ditemukan")
         
         if not results.empty:
             st.dataframe(
@@ -88,12 +84,11 @@ if check_password():
                 hide_index=True
             )
         else:
-            st.warning("Ups! Data tidak ditemukan. Coba kata kunci lain.")
+            st.warning("Data tidak ditemukan. Coba cek kembali ejaan atau pilih kategori lain.")
     else:
-        # Pesan awal saat tabel masih tersembunyi
-        st.info("💡 **Tips:** Masukkan kata kunci pada **Filter Utama** di atas untuk menampilkan daftar istilah.")
+        st.info("💡 **Tips:** Portal ini membantu menjaga konsistensi istilah (misal: penggunaan **'Alat'** untuk *Device*). Masukkan kata kunci di atas untuk memulai.")
 
-    # Tombol Refresh di Sidebar
-    if st.sidebar.button("🔄 Update Data dari Sheets"):
+    # Sidebar Refresh
+    if st.sidebar.button("🔄 Update Database"):
         st.cache_data.clear()
         st.rerun()
