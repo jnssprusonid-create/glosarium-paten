@@ -4,7 +4,7 @@ import pandas as pd
 
 # 1. Konfigurasi Halaman
 st.set_page_config(
-    page_title="Spruson & Ferguson - Adaptive Patent Glossary", 
+    page_title="Spruson & Ferguson - Patent Glossary", 
     page_icon="⚖️", 
     layout="wide"
 )
@@ -66,11 +66,11 @@ if check_password():
 
     # Master list of options
     master_options = {
-        "Istilah Asing": "istilah_asing",
-        "Padanan": "padanan",
-        "Nama Pemohon": "nama_pemohon",
-        "Nomor Permohonan": "nomor_permohonan",
-        "Sumber": "sumber"
+        "Foregin Term": "istilah_asing",
+        "ID Equivalent": "padanan",
+        "Client": "nama_pemohon",
+        "ID Application": "nomor_permohonan",
+        "Source of Information": "sumber"
     }
 
     st.write("---")
@@ -134,9 +134,50 @@ if check_password():
 
     # 6. SIDEBAR
     with st.sidebar:
-        st.image("https://www.spruson.com/wp-content/themes/spruson/assets/images/logo-spruson-ferguson.png", use_container_width=True)
-        if st.button("🔄 Sync Database"):
+                if st.button("🔄 Sync Database"):
             st.cache_data.clear()
             st.rerun()
         st.write("---")
         st.caption("Spruson & Ferguson Indonesia")
+
+# --- FORM KOMUNIKASI ---
+    st.write("---")
+    with st.expander("✉️ Contact Admin / Ask a Question About Terms"):
+        st.write("Use this form if you have questions about terminology or would like to suggest a new translation.")
+        
+        with st.form("email_form", clear_on_submit=True):
+            user_email = st.text_input("Your email address (for a reply):")
+            subject = st.selectbox("Category:", ["Proposed New Terms", "Correction", "Technical Questions"])
+            message = st.text_area("Message / Question Details:")
+            
+            submit_email = st.form_submit_button("Send Message")
+            
+            if submit_email:
+                if user_email and message:
+                    try:
+                        # Logika Pengiriman Email
+                        import smtplib
+                        from email.mime.text import MIMEText
+                        
+                        # Data dari Secrets
+                        sender_email = st.secrets["email"]["user"]
+                        sender_password = st.secrets["email"]["password"]
+                        target_email = "glossarysfid@gmail.com" 
+                        
+                        # Format Email
+                        email_body = f"Dari: {user_email}\nKategori: {subject}\n\nPesan:\n{message}"
+                        msg = MIMEText(email_body)
+                        msg['Subject'] = f"[Glosarium Portal] {subject}"
+                        msg['From'] = sender_email
+                        msg['To'] = target_email
+                        
+                        # Kirim menggunakan SMTP Gmail
+                        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+                            server.login(sender_email, sender_password)
+                            server.sendmail(sender_email, target_email, msg.as_string())
+                        
+                        st.success("✅ Your message has been sent to the Admin team. Thank you!")
+                    except Exception as e:
+                        st.error(f"❌ Failed to send the message. Make sure your SMTP settings are correct. Error: {e}")
+                else:
+                    st.warning("Please provide your email address and message.")
